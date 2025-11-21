@@ -141,7 +141,7 @@ O projeto está configurado por padrão para usar **SQLite** (arquivo local) via
 
 ## Vídeo demonstrativo
 
-Link do vídeo demonstrativo (máx. 5 minutos): **COLE_AQUI_O_LINK_DO_YOUTUBE**
+Link do vídeo demonstrativo (https://youtu.be/0TDeLswGf7g)
 
 ---
 
