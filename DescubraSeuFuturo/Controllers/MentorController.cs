@@ -1,17 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DescubraSeuFuturo.Data;
 using DescubraSeuFuturo.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DescubraSeuFuturo
 {
     [ApiController]
-    public class MentorController : Controller
+    [Route("api/v1/[controller]")]
+    public class MentorController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -20,139 +18,68 @@ namespace DescubraSeuFuturo
             _context = context;
         }
 
-        // GET: Mentor
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Mentor>>> GetAll()
         {
-            return View(await _context.Mentores.ToListAsync());
+            return Ok(await _context.Mentores.ToListAsync());
         }
 
-        // GET: Mentor/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Mentor>> GetById(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var mentor = await _context.Mentores
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (mentor == null)
-            {
-                return NotFound();
-            }
-
-            return View(mentor);
-        }
-
-        // GET: Mentor/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Mentor/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,AreaAtuacao,Descricao,Contato")] Mentor mentor)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(mentor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(mentor);
-        }
-
-        // GET: Mentor/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var mentor = await _context.Mentores.FindAsync(id);
+
             if (mentor == null)
-            {
                 return NotFound();
-            }
-            return View(mentor);
+
+            return Ok(mentor);
         }
 
-        // POST: Mentor/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,AreaAtuacao,Descricao,Contato")] Mentor mentor)
+        public async Task<ActionResult<Mentor>> Create([FromBody] Mentor mentor)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _context.Mentores.Add(mentor);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetById), new { id = mentor.Id }, mentor);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Mentor mentor)
         {
             if (id != mentor.Id)
-            {
+                return BadRequest("O ID da rota não corresponde ao ID enviado.");
+
+            var existing = await _context.Mentores.FindAsync(id);
+
+            if (existing == null)
                 return NotFound();
-            }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(mentor);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MentorExists(mentor.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(mentor);
-        }
-
-        // GET: Mentor/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var mentor = await _context.Mentores
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (mentor == null)
-            {
-                return NotFound();
-            }
-
-            return View(mentor);
-        }
-
-        // POST: Mentor/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var mentor = await _context.Mentores.FindAsync(id);
-            if (mentor != null)
-            {
-                _context.Mentores.Remove(mentor);
-            }
+            existing.Nome = mentor.Nome;
+            existing.AreaAtuacao = mentor.AreaAtuacao;
+            existing.Descricao = mentor.Descricao;
+            existing.Contato = mentor.Contato;
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return NoContent();
         }
 
-        private bool MentorExists(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return _context.Mentores.Any(e => e.Id == id);
+            var mentor = await _context.Mentores.FindAsync(id);
+
+            if (mentor == null)
+                return NotFound();
+
+            _context.Mentores.Remove(mentor);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

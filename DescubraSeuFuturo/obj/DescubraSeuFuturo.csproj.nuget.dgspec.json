@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\DescubraSeuFuturo\\DescubraSeuFuturo.csproj": {}
+    "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\descubraseufuturo\\DescubraSeuFuturo.csproj": {}
   },
   "projects": {
-    "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\DescubraSeuFuturo\\DescubraSeuFuturo.csproj": {
+    "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\descubraseufuturo\\DescubraSeuFuturo.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\DescubraSeuFuturo\\DescubraSeuFuturo.csproj",
+        "projectUniqueName": "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\descubraseufuturo\\DescubraSeuFuturo.csproj",
         "projectName": "DescubraSeuFuturo",
-        "projectPath": "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\DescubraSeuFuturo\\DescubraSeuFuturo.csproj",
+        "projectPath": "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\descubraseufuturo\\DescubraSeuFuturo.csproj",
         "packagesPath": "C:\\Users\\julic\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\DescubraSeuFuturo\\obj\\",
+        "outputPath": "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\descubraseufuturo\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "IA5m4/PySTs=",
+  "dgSpecHash": "gH1nB0r/KN4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\DescubraSeuFuturo\\DescubraSeuFuturo.csproj",
+  "projectFilePath": "C:\\Users\\julic\\Desktop\\GlobalSolution_Projeto_Completo_Fixed\\descubraseufuturo\\DescubraSeuFuturo.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\julic\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\julic\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

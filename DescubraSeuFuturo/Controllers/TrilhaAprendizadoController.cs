@@ -1,17 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DescubraSeuFuturo.Data;
 using DescubraSeuFuturo.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DescubraSeuFuturo
 {
     [ApiController]
-    public class TrilhaAprendizadoController : Controller
+    [Route("api/v1/[controller]")]
+    public class TrilhaAprendizadoController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -20,146 +18,56 @@ namespace DescubraSeuFuturo
             _context = context;
         }
 
-        // GET: TrilhaAprendizado
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TrilhaAprendizado>>> GetAll()
         {
-            var appDbContext = _context.TrilhasAprendizado.Include(t => t.Competencia);
-            return View(await appDbContext.ToListAsync());
+            return Ok(await _context.TrilhasAprendizado.ToListAsync());
         }
 
-        // GET: TrilhaAprendizado/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<TrilhaAprendizado>> GetById(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var trilhaAprendizado = await _context.TrilhasAprendizado
-                .Include(t => t.Competencia)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (trilhaAprendizado == null)
-            {
-                return NotFound();
-            }
-
-            return View(trilhaAprendizado);
+            var trilha = await _context.TrilhasAprendizado.FindAsync(id);
+            if (trilha == null) return NotFound();
+            return Ok(trilha);
         }
 
-        // GET: TrilhaAprendizado/Create
-        public IActionResult Create()
-        {
-            ViewData["CompetenciaId"] = new SelectList(_context.Competencias, "Id", "Id");
-            return View();
-        }
-
-        // POST: TrilhaAprendizado/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Descricao,CompetenciaId")] TrilhaAprendizado trilhaAprendizado)
+        public async Task<ActionResult<TrilhaAprendizado>> Create([FromBody] TrilhaAprendizado trilha)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(trilhaAprendizado);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CompetenciaId"] = new SelectList(_context.Competencias, "Id", "Id", trilhaAprendizado.CompetenciaId);
-            return View(trilhaAprendizado);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _context.TrilhasAprendizado.Add(trilha);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetById), new { id = trilha.Id }, trilha);
         }
 
-        // GET: TrilhaAprendizado/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] TrilhaAprendizado trilha)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id != trilha.Id)
+                return BadRequest("ID não corresponde ao corpo.");
 
-            var trilhaAprendizado = await _context.TrilhasAprendizado.FindAsync(id);
-            if (trilhaAprendizado == null)
-            {
-                return NotFound();
-            }
-            ViewData["CompetenciaId"] = new SelectList(_context.Competencias, "Id", "Id", trilhaAprendizado.CompetenciaId);
-            return View(trilhaAprendizado);
-        }
+            var existing = await _context.TrilhasAprendizado.FindAsync(id);
+            if (existing == null) return NotFound();
 
-        // POST: TrilhaAprendizado/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Descricao,CompetenciaId")] TrilhaAprendizado trilhaAprendizado)
-        {
-            if (id != trilhaAprendizado.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(trilhaAprendizado);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TrilhaAprendizadoExists(trilhaAprendizado.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CompetenciaId"] = new SelectList(_context.Competencias, "Id", "Id", trilhaAprendizado.CompetenciaId);
-            return View(trilhaAprendizado);
-        }
-
-        // GET: TrilhaAprendizado/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var trilhaAprendizado = await _context.TrilhasAprendizado
-                .Include(t => t.Competencia)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (trilhaAprendizado == null)
-            {
-                return NotFound();
-            }
-
-            return View(trilhaAprendizado);
-        }
-
-        // POST: TrilhaAprendizado/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var trilhaAprendizado = await _context.TrilhasAprendizado.FindAsync(id);
-            if (trilhaAprendizado != null)
-            {
-                _context.TrilhasAprendizado.Remove(trilhaAprendizado);
-            }
+            existing.Nome = trilha.Nome;
+            existing.Descricao = trilha.Descricao;
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return NoContent();
         }
 
-        private bool TrilhaAprendizadoExists(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return _context.TrilhasAprendizado.Any(e => e.Id == id);
+            var trilha = await _context.TrilhasAprendizado.FindAsync(id);
+            if (trilha == null) return NotFound();
+
+            _context.TrilhasAprendizado.Remove(trilha);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

@@ -1,17 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DescubraSeuFuturo.Data;
 using DescubraSeuFuturo.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DescubraSeuFuturo
 {
     [ApiController]
-    public class SetorController : Controller
+    [Route("api/v1/[controller]")]
+    public class SetorController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -20,139 +18,56 @@ namespace DescubraSeuFuturo
             _context = context;
         }
 
-        // GET: Setor
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Setor>>> GetAll()
         {
-            return View(await _context.Setores.ToListAsync());
+            return Ok(await _context.Setores.ToListAsync());
         }
 
-        // GET: Setor/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Setor>> GetById(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var setor = await _context.Setores
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (setor == null)
-            {
-                return NotFound();
-            }
-
-            return View(setor);
+            var s = await _context.Setores.FindAsync(id);
+            if (s == null) return NotFound();
+            return Ok(s);
         }
 
-        // GET: Setor/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Setor/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Descricao")] Setor setor)
+        public async Task<ActionResult<Setor>> Create([FromBody] Setor setor)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(setor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(setor);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _context.Setores.Add(setor);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetById), new { id = setor.Id }, setor);
         }
 
-        // GET: Setor/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var setor = await _context.Setores.FindAsync(id);
-            if (setor == null)
-            {
-                return NotFound();
-            }
-            return View(setor);
-        }
-
-        // POST: Setor/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Descricao")] Setor setor)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Setor setor)
         {
             if (id != setor.Id)
-            {
+                return BadRequest("ID não corresponde ao corpo da requisição.");
+
+            var existing = await _context.Setores.FindAsync(id);
+            if (existing == null)
                 return NotFound();
-            }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(setor);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SetorExists(setor.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(setor);
-        }
-
-        // GET: Setor/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var setor = await _context.Setores
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (setor == null)
-            {
-                return NotFound();
-            }
-
-            return View(setor);
-        }
-
-        // POST: Setor/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var setor = await _context.Setores.FindAsync(id);
-            if (setor != null)
-            {
-                _context.Setores.Remove(setor);
-            }
+            existing.Nome = setor.Nome;
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return NoContent();
         }
 
-        private bool SetorExists(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return _context.Setores.Any(e => e.Id == id);
+            var setor = await _context.Setores.FindAsync(id);
+            if (setor == null) return NotFound();
+
+            _context.Setores.Remove(setor);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

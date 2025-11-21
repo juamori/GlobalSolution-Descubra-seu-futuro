@@ -1,17 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DescubraSeuFuturo.Data;
 using DescubraSeuFuturo.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DescubraSeuFuturo
 {
     [ApiController]
-    public class HabilidadeController : Controller
+    [Route("api/v1/[controller]")]
+    public class HabilidadeController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -20,139 +18,57 @@ namespace DescubraSeuFuturo
             _context = context;
         }
 
-        // GET: Habilidade
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Habilidade>>> GetAll()
         {
-            return View(await _context.Habilidades.ToListAsync());
+            return Ok(await _context.Habilidades.ToListAsync());
         }
 
-        // GET: Habilidade/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Habilidade>> GetById(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var habilidade = await _context.Habilidades
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (habilidade == null)
-            {
-                return NotFound();
-            }
-
-            return View(habilidade);
+            var hab = await _context.Habilidades.FindAsync(id);
+            if (hab == null) return NotFound();
+            return Ok(hab);
         }
 
-        // GET: Habilidade/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Habilidade/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Tipo,Descricao")] Habilidade habilidade)
+        public async Task<ActionResult<Habilidade>> Create([FromBody] Habilidade habilidade)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(habilidade);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(habilidade);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _context.Habilidades.Add(habilidade);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetById), new { id = habilidade.Id }, habilidade);
         }
 
-        // GET: Habilidade/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var habilidade = await _context.Habilidades.FindAsync(id);
-            if (habilidade == null)
-            {
-                return NotFound();
-            }
-            return View(habilidade);
-        }
-
-        // POST: Habilidade/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Tipo,Descricao")] Habilidade habilidade)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Habilidade habilidade)
         {
             if (id != habilidade.Id)
-            {
+                return BadRequest("ID não corresponde ao corpo da requisição.");
+
+            var existing = await _context.Habilidades.FindAsync(id);
+            if (existing == null)
                 return NotFound();
-            }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(habilidade);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!HabilidadeExists(habilidade.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(habilidade);
-        }
-
-        // GET: Habilidade/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var habilidade = await _context.Habilidades
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (habilidade == null)
-            {
-                return NotFound();
-            }
-
-            return View(habilidade);
-        }
-
-        // POST: Habilidade/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var habilidade = await _context.Habilidades.FindAsync(id);
-            if (habilidade != null)
-            {
-                _context.Habilidades.Remove(habilidade);
-            }
+            existing.Nome = habilidade.Nome;
+            existing.Descricao = habilidade.Descricao;
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return NoContent();
         }
 
-        private bool HabilidadeExists(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return _context.Habilidades.Any(e => e.Id == id);
+            var hab = await _context.Habilidades.FindAsync(id);
+            if (hab == null) return NotFound();
+
+            _context.Habilidades.Remove(hab);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

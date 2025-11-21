@@ -295,3 +295,4 @@ C:\Users\julic\Desktop\GlobalSolution_Projeto_Completo_Fixed\DescubraSeuFuturo\o
 C:\Users\julic\Desktop\GlobalSolution_Projeto_Completo_Fixed\DescubraSeuFuturo\obj\Debug\net9.0\DescubraSeuFuturo.pdb
 C:\Users\julic\Desktop\GlobalSolution_Projeto_Completo_Fixed\DescubraSeuFuturo\obj\Debug\net9.0\DescubraSeuFuturo.genruntimeconfig.cache
 C:\Users\julic\Desktop\GlobalSolution_Projeto_Completo_Fixed\DescubraSeuFuturo\obj\Debug\net9.0\ref\DescubraSeuFuturo.dll
+C:\Users\julic\Desktop\GlobalSolution_Projeto_Completo_Fixed\descubraseufuturo\obj\Debug\net9.0\DescubraSeuFuturo.sourcelink.json

@@ -1,17 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DescubraSeuFuturo.Data;
 using DescubraSeuFuturo.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace DescubraSeuFuturo
 {
     [ApiController]
-    public class CompetenciaController : Controller
+    [Route("api/v1/[controller]")]
+    public class CompetenciaController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -20,146 +19,74 @@ namespace DescubraSeuFuturo
             _context = context;
         }
 
-        // GET: Competencia
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Competencia>>> GetAll()
         {
-            var appDbContext = _context.Competencias.Include(c => c.Setor);
-            return View(await appDbContext.ToListAsync());
+            var competencias = await _context.Competencias
+                .Include(c => c.Setor)
+                .ToListAsync();
+
+            return Ok(competencias);
         }
 
-        // GET: Competencia/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Competencia>> GetById(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var competencia = await _context.Competencias
                 .Include(c => c.Setor)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (competencia == null)
-            {
                 return NotFound();
-            }
 
-            return View(competencia);
+            return Ok(competencia);
         }
 
-        // GET: Competencia/Create
-        public IActionResult Create()
-        {
-            ViewData["SetorId"] = new SelectList(_context.Setores, "Id", "Id");
-            return View();
-        }
-
-        // POST: Competencia/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,NivelDemanda,Descricao,SetorId")] Competencia competencia)
+        public async Task<ActionResult<Competencia>> Create([FromBody] Competencia competencia)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(competencia);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["SetorId"] = new SelectList(_context.Setores, "Id", "Id", competencia.SetorId);
-            return View(competencia);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _context.Competencias.Add(competencia);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetById), new { id = competencia.Id }, competencia);
         }
 
-        // GET: Competencia/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var competencia = await _context.Competencias.FindAsync(id);
-            if (competencia == null)
-            {
-                return NotFound();
-            }
-            ViewData["SetorId"] = new SelectList(_context.Setores, "Id", "Id", competencia.SetorId);
-            return View(competencia);
-        }
-
-        // POST: Competencia/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,NivelDemanda,Descricao,SetorId")] Competencia competencia)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Competencia competencia)
         {
             if (id != competencia.Id)
-            {
+                return BadRequest("O ID do corpo não corresponde ao ID da rota.");
+
+            var existing = await _context.Competencias.FindAsync(id);
+
+            if (existing == null)
                 return NotFound();
-            }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(competencia);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CompetenciaExists(competencia.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["SetorId"] = new SelectList(_context.Setores, "Id", "Id", competencia.SetorId);
-            return View(competencia);
-        }
-
-        // GET: Competencia/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var competencia = await _context.Competencias
-                .Include(c => c.Setor)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (competencia == null)
-            {
-                return NotFound();
-            }
-
-            return View(competencia);
-        }
-
-        // POST: Competencia/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var competencia = await _context.Competencias.FindAsync(id);
-            if (competencia != null)
-            {
-                _context.Competencias.Remove(competencia);
-            }
+            existing.Nome = competencia.Nome;
+            existing.NivelDemanda = competencia.NivelDemanda;
+            existing.Descricao = competencia.Descricao;
+            existing.SetorId = competencia.SetorId;
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return NoContent();
         }
 
-        private bool CompetenciaExists(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return _context.Competencias.Any(e => e.Id == id);
+            var competencia = await _context.Competencias.FindAsync(id);
+
+            if (competencia == null)
+                return NotFound();
+
+            _context.Competencias.Remove(competencia);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

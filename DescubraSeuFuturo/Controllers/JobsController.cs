@@ -20,7 +20,6 @@ namespace DescubraSeuFuturo
             _logger = logger;
         }
 
-        // GET: api/v1/jobs
         [HttpGet]
         public ActionResult<IEnumerable<Job>> GetAll()
         {
@@ -29,7 +28,6 @@ namespace DescubraSeuFuturo
             return Ok(jobs);
         }
 
-        // GET: api/v1/jobs/{id}
         [HttpGet("{id:int}")]
         public ActionResult<Job> GetById(int id)
         {
@@ -45,7 +43,6 @@ namespace DescubraSeuFuturo
             return Ok(job);
         }
 
-        // POST: api/v1/jobs
         [HttpPost]
         public ActionResult<Job> Create([FromBody] Job job)
         {
@@ -63,7 +60,6 @@ namespace DescubraSeuFuturo
             return CreatedAtAction(nameof(GetById), new { id = job.Id }, job);
         }
 
-        // PUT: api/v1/jobs/{id}
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] Job job)
         {
@@ -93,7 +89,6 @@ namespace DescubraSeuFuturo
             return NoContent();
         }
 
-        // DELETE: api/v1/jobs/{id}
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
