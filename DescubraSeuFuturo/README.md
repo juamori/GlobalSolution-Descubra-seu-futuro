@@ -1,6 +1,6 @@
 # 🎓 Descubra Seu Futuro
 
-> Projeto desenvolvido como parte da disciplina de **Orientação Profissional**, com o propósito de ajudar pessoas em início de carreira ou em transição profissional a entender o mercado, descobrir novas oportunidades e planejar o próprio futuro de forma estratégica.
+> Projeto desenvolvido como parte da disciplina de C#, com o propósito de ajudar pessoas em início de carreira ou em transição profissional a entender o mercado, descobrir novas oportunidades e planejar o próprio futuro de forma estratégica.
 
 ---
 
